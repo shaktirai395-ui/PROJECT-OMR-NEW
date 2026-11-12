@@ -1,0 +1,1725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Interactive Pink OMR Answer Sheet</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root,
+    body[data-theme="pink"] {
+      --bg-page: #fdf2f8;
+      --bg-card: #ffffff;
+      --bg-paper-top: #fff5f8;
+      --bg-paper-bottom: #ffffff;
+      --border-accent: #db2777;
+      --border-soft: #fbcfe8;
+      --text-title: #831843;
+      --text-accent: #be185d;
+      --text-body: #1f2937;
+      --bubble-bg: #ffffff;
+      --bubble-hover: #fce7f3;
+      --bubble-selected-bg: #1f2937;
+      --bubble-selected-border: #111827;
+      --row-bg: #ffffff;
+    }
+    body[data-theme="lavender"] {
+      --bg-page: #f5f3ff;
+      --bg-card: #ffffff;
+      --bg-paper-top: #f5f3ff;
+      --bg-paper-bottom: #ffffff;
+      --border-accent: #7c3aed;
+      --border-soft: #ddd6fe;
+      --text-title: #4c1d95;
+      --text-accent: #6d28d9;
+      --text-body: #1f2937;
+      --bubble-bg: #ffffff;
+      --bubble-hover: #ede9fe;
+      --bubble-selected-bg: #1f2937;
+      --bubble-selected-border: #111827;
+      --row-bg: #ffffff;
+    }
+    body[data-theme="mint"] {
+      --bg-page: #ecfdf5;
+      --bg-card: #ffffff;
+      --bg-paper-top: #ecfdf5;
+      --bg-paper-bottom: #ffffff;
+      --border-accent: #059669;
+      --border-soft: #a7f3d0;
+      --text-title: #064e3b;
+      --text-accent: #047857;
+      --text-body: #1f2937;
+      --bubble-bg: #ffffff;
+      --bubble-hover: #d1fae5;
+      --bubble-selected-bg: #1f2937;
+      --bubble-selected-border: #111827;
+      --row-bg: #ffffff;
+    }
+    body[data-theme="blue"] {
+      --bg-page: #eff6ff;
+      --bg-card: #ffffff;
+      --bg-paper-top: #eff6ff;
+      --bg-paper-bottom: #ffffff;
+      --border-accent: #2563eb;
+      --border-soft: #bfdbfe;
+      --text-title: #1e3a8a;
+      --text-accent: #1d4ed8;
+      --text-body: #1f2937;
+      --bubble-bg: #ffffff;
+      --bubble-hover: #dbeafe;
+      --bubble-selected-bg: #1f2937;
+      --bubble-selected-border: #111827;
+      --row-bg: #ffffff;
+    }
+    body[data-theme="dark"] {
+      --bg-page: #0f172a;
+      --bg-card: #1e293b;
+      --bg-paper-top: #1e293b;
+      --bg-paper-bottom: #0f172a;
+      --border-accent: #f472b6;
+      --border-soft: #334155;
+      --text-title: #f9a8d4;
+      --text-accent: #f472b6;
+      --text-body: #f1f5f9;
+      --bubble-bg: #0f172a;
+      --bubble-hover: #334155;
+      --bubble-selected-bg: #f472b6;
+      --bubble-selected-border: #fbcfe8;
+      --row-bg: #1e293b;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg-page);
+      color: var(--text-body);
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+    .theme-card {
+      background-color: var(--bg-card);
+      border-color: var(--border-soft);
+    }
+    .theme-title {
+      color: var(--text-title);
+    }
+    .theme-accent {
+      color: var(--text-accent);
+    }
+    .theme-btn-primary {
+      background-color: var(--border-accent);
+      color: #ffffff;
+    }
+    .theme-btn-primary:hover {
+      filter: brightness(0.92);
+    }
+    .omr-paper {
+      background: linear-gradient(180deg, var(--bg-paper-top) 0%, var(--bg-paper-bottom) 100%);
+      border: 2px solid var(--border-accent);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.12);
+    }
+    .omr-bubble {
+      width: 2.15rem;
+      height: 2.15rem;
+      border-radius: 9999px;
+      border: 1.75px solid var(--border-accent);
+      color: var(--text-accent);
+      font-weight: 600;
+      font-size: 0.8rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.12s ease;
+      cursor: pointer;
+      user-select: none;
+      background-color: var(--bubble-bg);
+    }
+    .omr-bubble:hover:not(:disabled) {
+      background-color: var(--bubble-hover);
+      transform: scale(1.06);
+    }
+    .omr-bubble.selected {
+      background-color: var(--bubble-selected-bg);
+      border-color: var(--bubble-selected-border);
+      color: #ffffff;
+      box-shadow: inset 0 0 0 2px var(--bubble-hover);
+    }
+    body[data-theme="dark"] .omr-bubble.selected {
+      color: #0f172a;
+    }
+    .omr-bubble.correct-pick {
+      background-color: #16a34a;
+      border-color: #15803d;
+      color: #ffffff;
+    }
+    .omr-bubble.wrong-pick {
+      background-color: #dc2626;
+      border-color: #b91c1c;
+      color: #ffffff;
+    }
+    .omr-bubble.actual-answer {
+      border: 2.5px dashed #16a34a;
+      background-color: #dcfce7;
+      color: #15803d;
+    }
+    .omr-bubble:disabled {
+      cursor: not-allowed;
+      opacity: 0.9;
+    }
+    .q-row {
+      background-color: var(--row-bg);
+      border-color: var(--border-soft);
+    }
+    .q-row.active-q {
+      box-shadow: 0 0 0 2px var(--border-accent);
+    }
+    .q-row.flagged {
+      background-color: #fffbeb;
+      border-color: #f59e0b;
+      color: #1f2937;
+    }
+    .q-row.graded-correct {
+      background-color: #f0fdf4;
+      border-color: #86efac;
+      color: #1f2937;
+    }
+    .q-row.graded-wrong {
+      background-color: #fef2f2;
+      border-color: #fca5a5;
+      color: #1f2937;
+    }
+    @keyframes pulse-warn {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+    .timer-warn {
+      animation: pulse-warn 1s infinite;
+    }
+  </style>
+</head>
+<body class="min-h-screen antialiased" data-theme="pink">
+  <!-- Top Sticky Header -->
+  <header class="sticky top-0 z-30 theme-card backdrop-blur border-b shadow-sm">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-2">
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-lg theme-btn-primary flex items-center justify-center font-bold text-sm shadow-sm">
+          OMR
+        </div>
+        <div>
+          <h1 class="text-base sm:text-lg font-bold theme-title leading-tight">Interactive OMR Sheet</h1>
+          <p class="text-xs theme-accent hidden sm:block" id="headerSubtitle">50 Questions • Q1–Q50 • Options A–D</p>
+        </div>
+      </div>
+
+      <!-- Timer Bar -->
+      <div class="flex items-center gap-1.5 sm:gap-2 bg-pink-50/80 border border-pink-200 rounded-xl px-2.5 py-1.5 text-gray-900">
+        <span class="text-xs font-medium text-pink-700 hidden sm:inline">Timer</span>
+        <span id="timerDisplay" class="font-mono font-bold text-sm sm:text-base min-w-[4.5rem] text-center">00:45:00</span>
+        <button id="timerToggleBtn" type="button" class="px-2.5 py-1 rounded-lg theme-btn-primary text-xs font-semibold transition">
+          Start
+        </button>
+        <button id="timerResetBtn" type="button" class="px-2 py-1 rounded-lg bg-white hover:bg-gray-100 text-gray-700 border border-gray-200 text-xs font-medium transition" title="Reset Timer">
+          Reset
+        </button>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center gap-1.5 sm:gap-2">
+        <button id="soundToggleBtn" type="button" class="p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 text-xs font-medium transition" title="Toggle Click Sound">
+          🔊
+        </button>
+        <button id="openHistoryBtn" type="button" class="px-2.5 py-1.5 rounded-lg bg-white hover:bg-gray-50 text-gray-800 border border-gray-300 text-xs sm:text-sm font-medium transition">
+          History (<span id="historyCountBadge">0</span>)
+        </button>
+        <button id="openSettingsBtn" type="button" class="px-2.5 py-1.5 rounded-lg bg-white hover:bg-gray-50 text-gray-800 border border-gray-300 text-xs sm:text-sm font-medium transition">
+          Setup
+        </button>
+        <button id="openGradeBtn" type="button" class="px-3 py-1.5 rounded-lg theme-btn-primary text-xs sm:text-sm font-semibold shadow-sm transition">
+          Grade Key
+        </button>
+        <button id="exportCsvBtn" type="button" class="px-2.5 py-1.5 rounded-lg bg-white hover:bg-gray-50 text-gray-800 border border-gray-300 text-xs sm:text-sm font-medium transition hidden md:inline-flex">
+          Export CSV
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-7xl mx-auto px-3 sm:px-6 py-4 sm:py-6 grid grid-cols-1 lg:grid-cols-12 gap-5">
+    <!-- Left / Main OMR Sheet -->
+    <section class="lg:col-span-8 xl:col-span-9 space-y-4">
+      <!-- Re-Test Mode Banner -->
+      <div id="retestBanner" class="hidden rounded-2xl bg-amber-50 border-2 border-amber-400 px-4 py-3 flex flex-wrap items-center justify-between gap-2 shadow-sm text-amber-950">
+        <div class="flex items-center gap-2">
+          <span class="px-2 py-0.5 rounded-md bg-amber-400 text-amber-950 text-xs font-bold uppercase">Re-Test Mode</span>
+          <span id="retestBannerText" class="text-xs sm:text-sm font-medium">Practicing missed &amp; skipped questions.</span>
+        </div>
+        <button id="exitRetestBtn" type="button" class="px-3 py-1 rounded-lg bg-white hover:bg-amber-100 border border-amber-300 text-amber-900 text-xs font-semibold transition">
+          Exit Re-Test
+        </button>
+      </div>
+
+      <!-- Grading Results Banner (Hidden until graded) -->
+      <div id="resultsBanner" class="hidden rounded-2xl theme-card border-2 p-4 shadow-md space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 class="text-base sm:text-lg font-bold theme-title">Auto-Grading Scorecard</h2>
+            <p class="text-xs opacity-75" id="scoringRuleText">Marking: +4 Correct, -1 Wrong, 0 Unattempted</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button id="startRetestBtn" type="button" class="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold shadow-sm transition">
+              Re-Test Wrong &amp; Skipped
+            </button>
+            <button id="clearGradeBtn" type="button" class="px-3 py-1.5 rounded-lg bg-pink-100 hover:bg-pink-200 text-pink-900 text-xs font-semibold transition">
+              Resume Editing
+            </button>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-6 gap-2.5">
+          <div class="rounded-xl bg-pink-50 border border-pink-200 p-2.5 text-center text-pink-950">
+            <div class="text-xs text-pink-700 font-medium">Score</div>
+            <div id="statScore" class="text-lg font-bold">0 / 0</div>
+          </div>
+          <div class="rounded-xl bg-green-50 border border-green-200 p-2.5 text-center text-green-800">
+            <div class="text-xs font-medium">Correct</div>
+            <div id="statCorrect" class="text-lg font-bold">0</div>
+          </div>
+          <div class="rounded-xl bg-red-50 border border-red-200 p-2.5 text-center text-red-800">
+            <div class="text-xs font-medium">Wrong</div>
+            <div id="statWrong" class="text-lg font-bold">0</div>
+          </div>
+          <div class="rounded-xl bg-gray-50 border border-gray-200 p-2.5 text-center text-gray-700">
+            <div class="text-xs font-medium">Skipped</div>
+            <div id="statSkipped" class="text-lg font-bold">0</div>
+          </div>
+          <div class="rounded-xl bg-indigo-50 border border-indigo-200 p-2.5 text-center text-indigo-800">
+            <div class="text-xs font-medium">Accuracy</div>
+            <div id="statAccuracy" class="text-lg font-bold">0%</div>
+          </div>
+          <div class="rounded-xl bg-amber-50 border border-amber-200 p-2.5 text-center text-amber-900">
+            <div class="text-xs font-medium">Avg / Slowest</div>
+            <div id="statTiming" class="text-sm font-bold leading-tight mt-0.5">0s</div>
+          </div>
+        </div>
+
+        <!-- Section-Wise Analytics Breakdown -->
+        <div id="sectionAnalyticsWrap" class="hidden pt-2 border-t border-gray-200">
+          <h3 class="text-xs font-bold uppercase tracking-wider theme-accent mb-2">Section-Wise Breakdown</h3>
+          <div id="sectionAnalyticsGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2"></div>
+        </div>
+      </div>
+
+      <!-- Filter & Progress Bar -->
+      <div class="theme-card rounded-2xl border p-3 sm:p-4 shadow-sm space-y-2.5">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <!-- Status Filter Pills -->
+          <div class="flex items-center gap-1.5 flex-wrap" id="filterPills">
+            <button type="button" data-filter="all" class="filter-btn px-3 py-1 rounded-full text-xs font-semibold theme-btn-primary transition">All</button>
+            <button type="button" data-filter="answered" class="filter-btn px-3 py-1 rounded-full text-xs font-semibold bg-pink-50 text-pink-800 hover:bg-pink-100 transition">Answered</button>
+            <button type="button" data-filter="unanswered" class="filter-btn px-3 py-1 rounded-full text-xs font-semibold bg-pink-50 text-pink-800 hover:bg-pink-100 transition">Unanswered</button>
+            <button type="button" data-filter="flagged" class="filter-btn px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-800 hover:bg-amber-100 transition">Flagged</button>
+            <button type="button" data-filter="correct" class="filter-btn graded-filter hidden px-3 py-1 rounded-full text-xs font-semibold bg-green-50 text-green-800 hover:bg-green-100 transition">Correct</button>
+            <button type="button" data-filter="wrong" class="filter-btn graded-filter hidden px-3 py-1 rounded-full text-xs font-semibold bg-red-50 text-red-800 hover:bg-red-100 transition">Wrong</button>
+            <button type="button" data-filter="skipped" class="filter-btn graded-filter hidden px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700 hover:bg-gray-200 transition">Skipped</button>
+          </div>
+
+          <!-- Section Filter Dropdown -->
+          <div id="sectionFilterWrap" class="hidden items-center gap-1.5">
+            <label for="sectionFilterSelect" class="text-xs font-semibold theme-title">Section:</label>
+            <select id="sectionFilterSelect" class="rounded-lg border border-pink-300 bg-white px-2.5 py-1 text-xs font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-pink-500">
+              <option value="all">All Sections</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-gray-200/70 text-xs font-medium opacity-85">
+          <div class="flex flex-wrap items-center gap-3">
+            <span>Answered: <strong id="countAnswered" class="theme-accent">0</strong>/<span id="countTotal">50</span></span>
+            <span>Flagged: <strong id="countFlagged" class="text-amber-600">0</strong></span>
+            <span>Active: <strong id="activeQLabel" class="theme-accent">Q1</strong></span>
+            <span id="showingCountText" class="opacity-70">Showing 50</span>
+          </div>
+          <button id="clearAllBtn" type="button" class="text-red-500 hover:text-red-600 underline font-semibold">Clear Sheet</button>
+        </div>
+      </div>
+
+      <!-- OMR Paper Container -->
+      <div class="omr-paper rounded-2xl p-3 sm:p-5">
+        <div class="flex items-center justify-between border-b-2 pb-3 mb-4" style="border-color: var(--border-soft);">
+          <div>
+            <span class="text-xs font-bold tracking-widest uppercase theme-accent">Optical Mark Recognition</span>
+            <h2 class="text-lg font-bold theme-title">Candidate Response Sheet</h2>
+          </div>
+          <div class="text-right text-xs theme-accent">
+            <div>Tap bubble to mark</div>
+            <div>Start timer to track Q-time</div>
+          </div>
+        </div>
+
+        <!-- Questions Grid -->
+        <div id="omrGrid" class="grid grid-cols-1 md:grid-cols-2 gap-2.5"></div>
+
+        <div id="emptyFilterState" class="hidden py-10 text-center text-sm theme-accent">
+          No questions match the current filter.
+        </div>
+      </div>
+    </section>
+
+    <!-- Right Sidebar: Question Navigator -->
+    <aside class="lg:col-span-4 xl:col-span-3 space-y-4">
+      <div class="theme-card rounded-2xl border p-4 shadow-sm lg:sticky lg:top-20">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-sm font-bold theme-title">Question Navigator</h3>
+          <span class="text-xs theme-accent font-medium" id="navProgressPct">0% done</span>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="w-full h-2 bg-gray-200/70 rounded-full overflow-hidden mb-3">
+          <div id="navProgressBar" class="h-full theme-btn-primary transition-all duration-200" style="width: 0%"></div>
+        </div>
+
+        <!-- Legend -->
+        <div class="grid grid-cols-2 gap-1.5 text-[11px] opacity-80 mb-3 pb-3 border-b border-gray-200/70">
+          <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded theme-btn-primary inline-block"></span> Answered</div>
+          <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-white border border-gray-300 inline-block"></span> Unanswered</div>
+          <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-amber-400 inline-block"></span> Flagged</div>
+          <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-green-600 inline-block"></span> Correct (Graded)</div>
+        </div>
+
+        <!-- Navigator Grid -->
+        <div id="navGrid" class="grid grid-cols-5 sm:grid-cols-8 lg:grid-cols-5 gap-1.5 max-h-[55vh] overflow-y-auto pr-1"></div>
+
+        <button id="mobileExportBtn" type="button" class="mt-4 w-full py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-800 border border-gray-300 text-xs font-semibold transition md:hidden">
+          Export Responses (CSV)
+        </button>
+      </div>
+    </aside>
+  </main>
+
+  <!-- Setup Modal -->
+  <div id="settingsModal" class="hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white text-gray-900 rounded-2xl border border-gray-200 max-w-md w-full p-5 shadow-xl space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg font-bold text-gray-900">Sheet, Theme &amp; Backup Setup</h3>
+        <button type="button" data-close-modal="settingsModal" class="text-gray-400 hover:text-gray-700 text-xl leading-none">&times;</button>
+      </div>
+
+      <div class="space-y-3">
+        <!-- Color Theme Switcher -->
+        <div>
+          <label class="block text-xs font-semibold text-gray-700 mb-1">Color Theme</label>
+          <select id="inputTheme" class="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500">
+            <option value="pink">Classic Pink</option>
+            <option value="lavender">Soft Lavender</option>
+            <option value="mint">Mint Green</option>
+            <option value="blue">Ocean Blue</option>
+            <option value="dark">High-Contrast Dark Mode</option>
+          </select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-gray-700 mb-1">Start Question #</label>
+            <input id="inputStartQuestion" type="number" min="1" max="1000" value="1" class="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-700 mb-1">Question Count (1–200)</label>
+            <input id="inputQuestionCount" type="number" min="1" max="200" value="50" class="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500" />
+          </div>
+        </div>
+
+        <div class="flex gap-1.5 flex-wrap">
+          <button type="button" class="preset-q px-2.5 py-1 rounded-lg bg-pink-50 hover:bg-pink-100 text-pink-800 text-xs font-semibold border border-pink-200" data-q="20">20 Qs</button>
+          <button type="button" class="preset-q px-2.5 py-1 rounded-lg bg-pink-50 hover:bg-pink-100 text-pink-800 text-xs font-semibold border border-pink-200" data-q="50">50 Qs</button>
+          <button type="button" class="preset-q px-2.5 py-1 rounded-lg bg-pink-50 hover:bg-pink-100 text-pink-800 text-xs font-semibold border border-pink-200" data-q="100">100 Qs</button>
+          <button type="button" class="preset-q px-2.5 py-1 rounded-lg bg-pink-50 hover:bg-pink-100 text-pink-800 text-xs font-semibold border border-pink-200" data-q="180">180 Qs</button>
+          <button type="button" class="preset-q px-2.5 py-1 rounded-lg bg-pink-50 hover:bg-pink-100 text-pink-800 text-xs font-semibold border border-pink-200" data-q="200">200 Qs</button>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-gray-700 mb-1">Options per Question</label>
+          <select id="inputOptionCount" class="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500">
+            <option value="4">4 Options (A, B, C, D)</option>
+            <option value="5">5 Options (A, B, C, D, E)</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-gray-700 mb-1">Subject / Section Layout</label>
+          <select id="inputSectionMode" class="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500">
+            <option value="none">Single Sheet (No Sections)</option>
+            <option value="neet">NEET Style (Physics, Chemistry, Botany, Zoology)</option>
+            <option value="pcm">PCM Style (Physics, Chemistry, Maths)</option>
+            <option value="parts">4 Equal Parts (Part A, B, C, D)</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-gray-700 mb-1">Timer Duration (minutes)</label>
+          <input id="inputTimerMinutes" type="number" min="1" max="360" value="45" class="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500" />
+        </div>
+
+        <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer">
+          <input id="inputAutoLock" type="checkbox" checked class="rounded border-gray-300 text-pink-600 focus:ring-pink-500" />
+          <span>Auto-lock bubbles when timer reaches 00:00:00</span>
+        </label>
+
+        <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer">
+          <input id="inputSoundEnabled" type="checkbox" checked class="rounded border-gray-300 text-pink-600 focus:ring-pink-500" />
+          <span>Enable click sound &amp; timer chime</span>
+        </label>
+
+        <!-- JSON Backup & Restore -->
+        <div class="pt-2 border-t border-gray-200">
+          <label class="block text-xs font-semibold text-gray-700 mb-1.5">JSON Backup &amp; Restore</label>
+          <div class="grid grid-cols-2 gap-2">
+            <button id="backupJsonBtn" type="button" class="px-3 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-semibold transition">
+              Download Backup
+            </button>
+            <button id="restoreJsonBtn" type="button" class="px-3 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-semibold transition">
+              Restore from JSON
+            </button>
+            <input id="restoreFileInput" type="file" accept=".json,application/json" class="hidden" />
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2">
+        <button type="button" data-close-modal="settingsModal" class="px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium">Cancel</button>
+        <button id="applySettingsBtn" type="button" class="px-4 py-2 rounded-xl theme-btn-primary text-sm font-semibold">Apply Setup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Answer Key & Auto-Grading Modal -->
+  <div id="gradeModal" class="hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white text-gray-900 rounded-2xl border border-gray-200 max-w-lg w-full p-5 shadow-xl space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg font-bold text-gray-900">Answer Key &amp; Auto-Grading</h3>
+        <button type="button" data-close-modal="gradeModal" class="text-gray-400 hover:text-gray-700 text-xl leading-none">&times;</button>
+      </div>
+
+      <div class="space-y-3">
+        <div class="flex items-center justify-between">
+          <label class="text-xs font-semibold text-gray-700">Paste Answer Key</label>
+          <button id="fillSampleKeyBtn" type="button" class="text-xs font-semibold text-pink-600 hover:text-pink-700 underline">
+            Generate Sample Key
+          </button>
+        </div>
+        <textarea id="answerKeyInput" rows="5" placeholder="Supports any format:&#10;1:A, 2:B, 3:C, 4:D&#10;or A B C D A B...&#10;or ABCDABCD..." class="w-full rounded-xl border border-gray-300 p-3 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-pink-500"></textarea>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-gray-700 mb-1">Marks for Correct</label>
+            <input id="inputCorrectMarks" type="number" step="0.25" value="4" class="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-700 mb-1">Marks for Wrong (use negative)</label>
+            <input id="inputWrongMarks" type="number" step="0.25" value="-1" class="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500" />
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2">
+        <button type="button" data-close-modal="gradeModal" class="px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium">Cancel</button>
+        <button id="runGradeBtn" type="button" class="px-4 py-2 rounded-xl theme-btn-primary text-sm font-semibold">Grade Sheet</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Multi-Attempt History Modal -->
+  <div id="historyModal" class="hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white text-gray-900 rounded-2xl border border-gray-200 max-w-xl w-full p-5 shadow-xl space-y-4 max-h-[85vh] flex flex-col">
+      <div class="flex items-center justify-between">
+        <div>
+          <h3 class="text-lg font-bold text-gray-900">Attempt History</h3>
+          <p class="text-xs text-gray-500">Saved locally across your graded OMR sessions</p>
+        </div>
+        <button type="button" data-close-modal="historyModal" class="text-gray-400 hover:text-gray-700 text-xl leading-none">&times;</button>
+      </div>
+
+      <div class="grid grid-cols-3 gap-2.5">
+        <div class="rounded-xl bg-pink-50 border border-pink-200 p-2.5 text-center">
+          <div class="text-[11px] text-pink-700 font-medium">Attempts</div>
+          <div id="histTotalCount" class="text-base font-bold text-pink-950">0</div>
+        </div>
+        <div class="rounded-xl bg-indigo-50 border border-indigo-200 p-2.5 text-center">
+          <div class="text-[11px] text-indigo-700 font-medium">Avg Accuracy</div>
+          <div id="histAvgAccuracy" class="text-base font-bold text-indigo-800">0%</div>
+        </div>
+        <div class="rounded-xl bg-green-50 border border-green-200 p-2.5 text-center">
+          <div class="text-[11px] text-green-700 font-medium">Best Accuracy</div>
+          <div id="histBestAccuracy" class="text-base font-bold text-green-800">0%</div>
+        </div>
+      </div>
+
+      <div id="histChartWrap" class="hidden rounded-xl bg-pink-50/50 border border-pink-100 p-3">
+        <div class="text-[11px] font-semibold text-pink-800 mb-1.5">Recent Accuracy Trend</div>
+        <div id="histSparkline" class="w-full h-16 flex items-end gap-1.5"></div>
+      </div>
+
+      <div id="historyList" class="flex-1 overflow-y-auto space-y-2 pr-1 min-h-[120px]"></div>
+
+      <div class="flex items-center justify-between pt-2 border-t border-gray-200">
+        <button id="clearHistoryBtn" type="button" class="text-xs font-semibold text-red-600 hover:text-red-700 underline">
+          Clear History
+        </button>
+        <button type="button" data-close-modal="historyModal" class="px-4 py-2 rounded-xl theme-btn-primary text-xs font-semibold">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Clear Confirmation Modal -->
+  <div id="confirmClearModal" class="hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white text-gray-900 rounded-2xl border border-gray-200 max-w-sm w-full p-5 shadow-xl space-y-4">
+      <h3 class="text-base font-bold text-gray-900">Clear All Responses?</h3>
+      <p class="text-sm text-gray-600">This will erase all marked bubbles, review flags, per-question times, and grading results on the current sheet.</p>
+      <div class="flex justify-end gap-2">
+        <button type="button" data-close-modal="confirmClearModal" class="px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium">Cancel</button>
+        <button id="confirmClearBtn" type="button" class="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-sm font-semibold">Clear Sheet</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="hidden fixed bottom-5 left-1/2 -translate-x-1/2 z-50 bg-gray-900 text-white text-xs sm:text-sm font-medium px-4 py-2.5 rounded-xl shadow-lg"></div>
+
+  <script>
+    (function () {
+      const STORAGE_KEY = 'pink_omr_sheet_state_v4';
+      const HISTORY_KEY = 'pink_omr_history_v1';
+      const OPTION_LETTERS = ['A', 'B', 'C', 'D', 'E'];
+      const SECTION_PRESETS = {
+        none: [],
+        neet: ['Physics', 'Chemistry', 'Botany', 'Zoology'],
+        pcm: ['Physics', 'Chemistry', 'Mathematics'],
+        parts: ['Part A', 'Part B', 'Part C', 'Part D']
+      };
+
+      let state = {
+        theme: 'pink',
+        startQuestion: 1,
+        questionCount: 50,
+        optionCount: 4,
+        sectionMode: 'none',
+        sectionFilter: 'all',
+        timerMinutes: 45,
+        secondsLeft: 45 * 60,
+        timerRunning: false,
+        autoLockOnTimeUp: true,
+        soundEnabled: true,
+        locked: false,
+        filter: 'all',
+        activeQuestion: 1,
+        retestQueue: null,
+        answers: {},
+        flagged: {},
+        questionTimes: {},
+        answerKey: {},
+        graded: false,
+        correctMarks: 4,
+        wrongMarks: -1
+      };
+
+      let historyListData = [];
+      let timerInterval = null;
+      let toastTimeout = null;
+      let audioCtx = null;
+
+      // DOM Elements
+      const omrGrid = document.getElementById('omrGrid');
+      const navGrid = document.getElementById('navGrid');
+      const emptyFilterState = document.getElementById('emptyFilterState');
+      const headerSubtitle = document.getElementById('headerSubtitle');
+      const timerDisplay = document.getElementById('timerDisplay');
+      const timerToggleBtn = document.getElementById('timerToggleBtn');
+      const timerResetBtn = document.getElementById('timerResetBtn');
+      const soundToggleBtn = document.getElementById('soundToggleBtn');
+      const countAnswered = document.getElementById('countAnswered');
+      const countTotal = document.getElementById('countTotal');
+      const countFlagged = document.getElementById('countFlagged');
+      const activeQLabel = document.getElementById('activeQLabel');
+      const showingCountText = document.getElementById('showingCountText');
+      const navProgressPct = document.getElementById('navProgressPct');
+      const navProgressBar = document.getElementById('navProgressBar');
+      const resultsBanner = document.getElementById('resultsBanner');
+      const retestBanner = document.getElementById('retestBanner');
+      const sectionFilterWrap = document.getElementById('sectionFilterWrap');
+      const sectionFilterSelect = document.getElementById('sectionFilterSelect');
+      const historyCountBadge = document.getElementById('historyCountBadge');
+
+      function playSound(type) {
+        if (!state.soundEnabled) return;
+        try {
+          const Ctx = window.AudioContext || window.webkitAudioContext;
+          if (!Ctx) return;
+          if (!audioCtx) audioCtx = new Ctx();
+          if (audioCtx.state === 'suspended') audioCtx.resume();
+
+          const now = audioCtx.currentTime;
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+
+          if (type === 'mark') {
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(620, now);
+            osc.frequency.exponentialRampToValueAtTime(880, now + 0.045);
+            gain.gain.setValueAtTime(0.08, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.055);
+            osc.start(now);
+            osc.stop(now + 0.06);
+          } else if (type === 'clear') {
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(420, now);
+            osc.frequency.exponentialRampToValueAtTime(280, now + 0.05);
+            gain.gain.setValueAtTime(0.06, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+            osc.start(now);
+            osc.stop(now + 0.065);
+          } else if (type === 'flag') {
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(520, now);
+            gain.gain.setValueAtTime(0.07, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.07);
+            osc.start(now);
+            osc.stop(now + 0.075);
+          } else if (type === 'chime') {
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(587.33, now);
+            osc.frequency.setValueAtTime(880, now + 0.14);
+            gain.gain.setValueAtTime(0.12, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+            osc.start(now);
+            osc.stop(now + 0.46);
+          }
+        } catch (e) {}
+      }
+
+      function showToast(msg) {
+        const toast = document.getElementById('toast');
+        toast.textContent = msg;
+        toast.classList.remove('hidden');
+        clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(() => toast.classList.add('hidden'), 2800);
+      }
+
+      function applyTheme() {
+        document.body.setAttribute('data-theme', state.theme || 'pink');
+        soundToggleBtn.textContent = state.soundEnabled ? '🔊' : '🔇';
+        soundToggleBtn.title = state.soundEnabled ? 'Sound On (Click to Mute)' : 'Sound Muted (Click to Enable)';
+      }
+
+      function saveState() {
+        try {
+          const toSave = { ...state, timerRunning: false };
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
+        } catch (e) {}
+      }
+
+      function loadState() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            if (parsed && typeof parsed.questionCount === 'number') {
+              state = {
+                ...state,
+                ...parsed,
+                timerRunning: false
+              };
+            }
+          }
+          const rawHist = localStorage.getItem(HISTORY_KEY);
+          if (rawHist) {
+            const parsedHist = JSON.parse(rawHist);
+            if (Array.isArray(parsedHist)) historyListData = parsedHist;
+          }
+        } catch (e) {}
+      }
+
+      function saveHistory() {
+        try {
+          localStorage.setItem(HISTORY_KEY, JSON.stringify(historyListData));
+        } catch (e) {}
+        historyCountBadge.textContent = String(historyListData.length);
+      }
+
+      function getActiveQuestionNumbers() {
+        if (Array.isArray(state.retestQueue) && state.retestQueue.length > 0) {
+          return state.retestQueue;
+        }
+        const start = state.startQuestion || 1;
+        const arr = [];
+        for (let i = 0; i < state.questionCount; i++) arr.push(start + i);
+        return arr;
+      }
+
+      function getSections() {
+        const names = SECTION_PRESETS[state.sectionMode] || [];
+        if (!names.length) return [];
+        const total = state.questionCount;
+        const count = Math.min(names.length, total);
+        const baseSize = Math.floor(total / count);
+        const remainder = total % count;
+        const sections = [];
+        let start = state.startQuestion || 1;
+        for (let i = 0; i < count; i++) {
+          const size = baseSize + (i < remainder ? 1 : 0);
+          const end = start + size - 1;
+          sections.push({ name: names[i], start, end });
+          start = end + 1;
+        }
+        return sections;
+      }
+
+      function getQuestionSection(q, sections) {
+        for (let i = 0; i < sections.length; i++) {
+          if (q >= sections[i].start && q <= sections[i].end) {
+            return sections[i].name;
+          }
+        }
+        return '';
+      }
+
+      function formatTime(totalSec) {
+        const s = Math.max(0, Math.floor(totalSec));
+        const hrs = Math.floor(s / 3600);
+        const mins = Math.floor((s % 3600) / 60);
+        const secs = s % 60;
+        return [hrs, mins, secs].map(v => String(v).padStart(2, '0')).join(':');
+      }
+
+      function formatShortTime(sec) {
+        const s = Math.max(0, Math.floor(sec || 0));
+        if (s < 60) return `${s}s`;
+        const m = Math.floor(s / 60);
+        const rem = s % 60;
+        return `${m}m ${rem}s`;
+      }
+
+      function renderTimer() {
+        timerDisplay.textContent = formatTime(state.secondsLeft);
+        if (state.secondsLeft <= 300 && state.secondsLeft > 0 && state.timerRunning) {
+          timerDisplay.classList.add('text-red-600', 'timer-warn');
+        } else if (state.secondsLeft === 0) {
+          timerDisplay.classList.add('text-red-600');
+          timerDisplay.classList.remove('timer-warn');
+        } else {
+          timerDisplay.classList.remove('text-red-600', 'timer-warn');
+        }
+        timerToggleBtn.textContent = state.timerRunning ? 'Pause' : 'Start';
+      }
+
+      function stopTimer() {
+        if (timerInterval) {
+          clearInterval(timerInterval);
+          timerInterval = null;
+        }
+        state.timerRunning = false;
+        renderTimer();
+      }
+
+      function startTimer() {
+        if (state.secondsLeft <= 0) {
+          showToast('Timer is at 00:00:00. Click Reset to restart.');
+          return;
+        }
+        if (timerInterval) clearInterval(timerInterval);
+        state.timerRunning = true;
+        renderTimer();
+        timerInterval = setInterval(() => {
+          if (state.secondsLeft > 0) {
+            state.secondsLeft -= 1;
+            const aq = String(state.activeQuestion || state.startQuestion || 1);
+            state.questionTimes[aq] = (state.questionTimes[aq] || 0) + 1;
+            const timeBadge = document.getElementById(`q-time-${aq}`);
+            if (timeBadge) {
+              timeBadge.textContent = formatShortTime(state.questionTimes[aq]);
+            }
+            renderTimer();
+            if (state.secondsLeft % 5 === 0) saveState();
+            if (state.secondsLeft === 0) {
+              stopTimer();
+              playSound('chime');
+              if (state.autoLockOnTimeUp) {
+                state.locked = true;
+                renderAll();
+                showToast('Time is up! Sheet locked.');
+              } else {
+                showToast('Time is up!');
+              }
+              saveState();
+            }
+          }
+        }, 1000);
+      }
+
+      function toggleTimer() {
+        if (state.timerRunning) {
+          stopTimer();
+          saveState();
+        } else {
+          startTimer();
+        }
+      }
+
+      function resetTimer() {
+        stopTimer();
+        state.secondsLeft = state.timerMinutes * 60;
+        state.locked = false;
+        renderTimer();
+        renderAll();
+        saveState();
+      }
+
+      function parseAnswerKey(rawText) {
+        const validLetters = OPTION_LETTERS.slice(0, state.optionCount);
+        const keyMap = {};
+        const text = rawText.trim().toUpperCase();
+        if (!text) return keyMap;
+
+        const minQ = state.startQuestion || 1;
+        const maxQ = minQ + state.questionCount - 1;
+
+        const numberedRegex = /(\d+)\s*[:.\-\s]\s*([A-E])/g;
+        let match;
+        let foundNumbered = false;
+        while ((match = numberedRegex.exec(text)) !== null) {
+          foundNumbered = true;
+          const qNum = parseInt(match[1], 10);
+          const opt = match[2];
+          if (qNum >= minQ && qNum <= maxQ && validLetters.includes(opt)) {
+            keyMap[String(qNum)] = opt;
+          }
+        }
+        if (foundNumbered) return keyMap;
+
+        const lettersOnly = text.replace(/[^A-E]/g, '');
+        for (let i = 0; i < lettersOnly.length && i < state.questionCount; i++) {
+          if (validLetters.includes(lettersOnly[i])) {
+            keyMap[String(minQ + i)] = lettersOnly[i];
+          }
+        }
+        return keyMap;
+      }
+
+      function renderSectionFilter() {
+        const sections = getSections();
+        if (!sections.length) {
+          sectionFilterWrap.classList.add('hidden');
+          sectionFilterWrap.classList.remove('flex');
+          state.sectionFilter = 'all';
+          return;
+        }
+        sectionFilterWrap.classList.remove('hidden');
+        sectionFilterWrap.classList.add('flex');
+
+        const current = state.sectionFilter;
+        sectionFilterSelect.innerHTML = '<option value="all">All Sections</option>';
+        sections.forEach(sec => {
+          const opt = document.createElement('option');
+          opt.value = sec.name;
+          opt.textContent = `${sec.name} (${sec.start}–${sec.end})`;
+          sectionFilterSelect.appendChild(opt);
+        });
+        if (sections.some(s => s.name === current)) {
+          sectionFilterSelect.value = current;
+        } else {
+          state.sectionFilter = 'all';
+          sectionFilterSelect.value = 'all';
+        }
+      }
+
+      function computeGradingStats() {
+        const activeNums = getActiveQuestionNumbers();
+        const sections = getSections();
+        let correct = 0;
+        let wrong = 0;
+        let skipped = 0;
+        let keyCount = 0;
+        let totalTimeSec = 0;
+        let slowestQ = null;
+        let slowestSec = -1;
+
+        const secStats = {};
+        sections.forEach(s => {
+          secStats[s.name] = { correct: 0, wrong: 0, skipped: 0, total: 0 };
+        });
+
+        activeNums.forEach(q => {
+          const k = String(q);
+          const ans = state.answers[k];
+          const key = state.answerKey[k];
+          const qSec = state.questionTimes[k] || 0;
+          totalTimeSec += qSec;
+          if (qSec > slowestSec) {
+            slowestSec = qSec;
+            slowestQ = q;
+          }
+
+          if (!key) return;
+          keyCount++;
+          const secName = getQuestionSection(q, sections);
+          if (secName && secStats[secName]) secStats[secName].total++;
+
+          if (!ans) {
+            skipped++;
+            if (secName && secStats[secName]) secStats[secName].skipped++;
+          } else if (ans === key) {
+            correct++;
+            if (secName && secStats[secName]) secStats[secName].correct++;
+          } else {
+            wrong++;
+            if (secName && secStats[secName]) secStats[secName].wrong++;
+          }
+        });
+
+        const totalScore = (correct * state.correctMarks) + (wrong * state.wrongMarks);
+        const maxScore = keyCount * state.correctMarks;
+        const attempted = correct + wrong;
+        const accuracy = attempted > 0 ? Math.round((correct / attempted) * 100) : 0;
+        const avgSec = activeNums.length > 0 ? Math.round(totalTimeSec / activeNums.length) : 0;
+
+        return {
+          correct, wrong, skipped, keyCount, totalScore, maxScore,
+          accuracy, totalTimeSec, avgSec, slowestQ, slowestSec, secStats, sections
+        };
+      }
+
+      function renderGradingBanner() {
+        if (!state.graded) {
+          resultsBanner.classList.add('hidden');
+          return;
+        }
+        const stats = computeGradingStats();
+
+        document.getElementById('statScore').textContent = `${stats.totalScore} / ${stats.maxScore}`;
+        document.getElementById('statCorrect').textContent = String(stats.correct);
+        document.getElementById('statWrong').textContent = String(stats.wrong);
+        document.getElementById('statSkipped').textContent = String(stats.skipped);
+        document.getElementById('statAccuracy').textContent = `${stats.accuracy}%`;
+        document.getElementById('statTiming').textContent =
+          stats.slowestSec > 0
+            ? `${formatShortTime(stats.avgSec)} / Q${stats.slowestQ} (${formatShortTime(stats.slowestSec)})`
+            : `${formatShortTime(stats.avgSec)} avg`;
+
+        document.getElementById('scoringRuleText').textContent =
+          `Graded against ${stats.keyCount} keyed questions • +${state.correctMarks} Correct, ${state.wrongMarks} Wrong`;
+
+        const retestBtn = document.getElementById('startRetestBtn');
+        retestBtn.classList.toggle('hidden', (stats.wrong + stats.skipped) === 0);
+
+        const secWrap = document.getElementById('sectionAnalyticsWrap');
+        const secGrid = document.getElementById('sectionAnalyticsGrid');
+        if (stats.sections.length) {
+          secGrid.innerHTML = '';
+          stats.sections.forEach(s => {
+            const st = stats.secStats[s.name];
+            if (!st || st.total === 0) return;
+            const secScore = (st.correct * state.correctMarks) + (st.wrong * state.wrongMarks);
+            const secMax = st.total * state.correctMarks;
+            const card = document.createElement('div');
+            card.className = 'rounded-xl bg-pink-50/70 border border-pink-200 p-2.5 text-xs text-gray-900';
+            card.innerHTML = `
+              <div class="font-bold text-pink-950 truncate">${s.name}</div>
+              <div class="text-pink-700 font-semibold mt-0.5">${secScore} / ${secMax}</div>
+              <div class="text-[11px] text-gray-600 mt-1">✓ ${st.correct} • ✗ ${st.wrong} • – ${st.skipped}</div>
+            `;
+            secGrid.appendChild(card);
+          });
+          secWrap.classList.toggle('hidden', secGrid.children.length === 0);
+        } else {
+          secWrap.classList.add('hidden');
+        }
+
+        resultsBanner.classList.remove('hidden');
+      }
+
+      function matchesFilters(q, sections) {
+        const qKey = String(q);
+        const selected = state.answers[qKey] || null;
+        const isFlagged = Boolean(state.flagged[qKey]);
+        const expected = state.answerKey[qKey] || null;
+
+        if (state.sectionFilter !== 'all' && sections.length) {
+          if (getQuestionSection(q, sections) !== state.sectionFilter) return false;
+        }
+
+        if (state.filter === 'answered') return selected !== null;
+        if (state.filter === 'unanswered') return selected === null;
+        if (state.filter === 'flagged') return isFlagged;
+        if (state.graded && state.filter === 'correct') return Boolean(expected && selected === expected);
+        if (state.graded && state.filter === 'wrong') return Boolean(expected && selected && selected !== expected);
+        if (state.graded && state.filter === 'skipped') return Boolean(expected && !selected);
+        return true;
+      }
+
+      function renderSheet() {
+        const letters = OPTION_LETTERS.slice(0, state.optionCount);
+        const sections = getSections();
+        const activeNums = getActiveQuestionNumbers();
+        const fragment = document.createDocumentFragment();
+        let visibleCount = 0;
+        let lastRenderedSection = '';
+
+        activeNums.forEach(q => {
+          if (!matchesFilters(q, sections)) return;
+          visibleCount++;
+
+          const currentSection = getQuestionSection(q, sections);
+          if (currentSection && currentSection !== lastRenderedSection) {
+            lastRenderedSection = currentSection;
+            const secHeader = document.createElement('div');
+            secHeader.className = 'md:col-span-2 mt-2 mb-1 px-3 py-1.5 rounded-lg bg-pink-100/90 border border-pink-200 text-xs font-bold uppercase tracking-wider text-pink-900';
+            secHeader.textContent = currentSection;
+            fragment.appendChild(secHeader);
+          }
+
+          const qKey = String(q);
+          const selected = state.answers[qKey] || null;
+          const isFlagged = Boolean(state.flagged[qKey]);
+          const expected = state.answerKey[qKey] || null;
+          const qTime = state.questionTimes[qKey] || 0;
+
+          const row = document.createElement('div');
+          row.id = `q-row-${q}`;
+          let rowClasses = 'q-row flex items-center justify-between gap-2 rounded-xl border px-3 py-2 transition';
+          if (state.activeQuestion === q && !state.graded) rowClasses += ' active-q';
+          if (state.graded && expected) {
+            if (selected === expected) rowClasses += ' graded-correct';
+            else if (selected && selected !== expected) rowClasses += ' graded-wrong';
+          } else if (isFlagged) {
+            rowClasses += ' flagged';
+          }
+          row.className = rowClasses;
+
+          const numWrap = document.createElement('div');
+          numWrap.className = 'flex items-center gap-1.5 min-w-[3.4rem]';
+          const numSpan = document.createElement('span');
+          numSpan.className = 'font-bold text-sm tabular-nums';
+          numSpan.textContent = `${q}.`;
+          numWrap.appendChild(numSpan);
+
+          if (state.graded && expected) {
+            const badge = document.createElement('span');
+            badge.className = 'text-xs font-bold ' + (selected === expected ? 'text-green-600' : selected ? 'text-red-600' : 'text-gray-400');
+            badge.textContent = selected === expected ? '✓' : selected ? '✗' : '–';
+            numWrap.appendChild(badge);
+          }
+
+          const bubbleGroup = document.createElement('div');
+          bubbleGroup.className = 'flex items-center gap-1.5 sm:gap-2';
+          letters.forEach(letter => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.dataset.q = qKey;
+            btn.dataset.opt = letter;
+            btn.textContent = letter;
+            btn.disabled = state.locked || state.graded;
+
+            let bClass = 'omr-bubble';
+            if (state.graded && expected) {
+              if (selected === letter && letter === expected) bClass += ' correct-pick';
+              else if (selected === letter && letter !== expected) bClass += ' wrong-pick';
+              else if (letter === expected && selected !== expected) bClass += ' actual-answer';
+            } else if (selected === letter) {
+              bClass += ' selected';
+            }
+            btn.className = bClass;
+            bubbleGroup.appendChild(btn);
+          });
+
+          const rightControls = document.createElement('div');
+          rightControls.className = 'flex items-center gap-1.5';
+
+          const timePill = document.createElement('span');
+          timePill.id = `q-time-${q}`;
+          timePill.className = 'text-[10px] font-mono px-1.5 py-0.5 rounded bg-gray-100 text-gray-700 border border-gray-200 tabular-nums';
+          timePill.textContent = formatShortTime(qTime);
+          timePill.title = 'Time spent on this question';
+
+          const flagBtn = document.createElement('button');
+          flagBtn.type = 'button';
+          flagBtn.dataset.flagQ = qKey;
+          flagBtn.title = isFlagged ? 'Remove Review Flag' : 'Mark for Review';
+          flagBtn.className = `p-1.5 rounded-lg border text-xs font-semibold transition ${
+            isFlagged
+              ? 'bg-amber-400 border-amber-500 text-amber-950'
+              : 'bg-gray-50 border-gray-200 text-gray-500 hover:bg-amber-50 hover:text-amber-600 hover:border-amber-300'
+          }`;
+          flagBtn.innerHTML = `<svg class="w-3.5 h-3.5 pointer-events-none" fill="${isFlagged ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3v18m0-13h13l-2.5 4L16 17H3"/></svg>`;
+
+          rightControls.appendChild(timePill);
+          rightControls.appendChild(flagBtn);
+
+          row.appendChild(numWrap);
+          row.appendChild(bubbleGroup);
+          row.appendChild(rightControls);
+          fragment.appendChild(row);
+        });
+
+        omrGrid.innerHTML = '';
+        omrGrid.appendChild(fragment);
+        emptyFilterState.classList.toggle('hidden', visibleCount > 0);
+        showingCountText.textContent = `Showing ${visibleCount} of ${activeNums.length}`;
+      }
+
+      function renderNavigator() {
+        const activeNums = getActiveQuestionNumbers();
+        const fragment = document.createDocumentFragment();
+        let answered = 0;
+        let flaggedCount = 0;
+
+        activeNums.forEach(q => {
+          const qKey = String(q);
+          const sel = state.answers[qKey];
+          const flg = Boolean(state.flagged[qKey]);
+          const exp = state.answerKey[qKey];
+
+          if (sel) answered++;
+          if (flg) flaggedCount++;
+
+          const cell = document.createElement('button');
+          cell.type = 'button';
+          cell.dataset.jumpQ = qKey;
+          cell.textContent = qKey;
+
+          let cls = 'h-8 rounded-lg text-xs font-semibold border transition flex items-center justify-center ';
+          if (state.graded && exp) {
+            if (sel === exp) cls += 'bg-green-600 border-green-700 text-white';
+            else if (sel) cls += 'bg-red-600 border-red-700 text-white';
+            else cls += 'bg-gray-100 border-gray-300 text-gray-600';
+          } else if (flg) {
+            cls += 'bg-amber-400 border-amber-500 text-amber-950';
+          } else if (sel) {
+            cls += 'theme-btn-primary border-transparent';
+          } else {
+            cls += 'bg-white border-gray-300 text-gray-800 hover:bg-gray-50';
+          }
+          if (state.activeQuestion === q && !state.graded) {
+            cls += ' ring-2 ring-amber-400';
+          }
+          cell.className = cls;
+          fragment.appendChild(cell);
+        });
+
+        navGrid.innerHTML = '';
+        navGrid.appendChild(fragment);
+
+        const total = activeNums.length;
+        const pct = total > 0 ? Math.round((answered / total) * 100) : 0;
+        countAnswered.textContent = String(answered);
+        countTotal.textContent = String(total);
+        countFlagged.textContent = String(flaggedCount);
+        activeQLabel.textContent = `Q${state.activeQuestion}`;
+        navProgressPct.textContent = `${pct}% done`;
+        navProgressBar.style.width = `${pct}%`;
+
+        const isRetest = Array.isArray(state.retestQueue) && state.retestQueue.length > 0;
+        retestBanner.classList.toggle('hidden', !isRetest);
+        if (isRetest) {
+          document.getElementById('retestBannerText').textContent =
+            `Practicing ${total} missed & skipped questions from your previous sheet.`;
+        }
+
+        const firstQ = activeNums[0] || 1;
+        const lastQ = activeNums[activeNums.length - 1] || total;
+        const secLabel = state.sectionMode !== 'none' ? ` • ${state.sectionMode.toUpperCase()}` : '';
+        const modeLabel = isRetest ? ' • Re-Test' : '';
+        headerSubtitle.textContent = `${total} Questions (Q${firstQ}–Q${lastQ}) • A–${OPTION_LETTERS[state.optionCount - 1]}${secLabel}${modeLabel}${state.locked ? ' • Locked' : ''}`;
+      }
+
+      function renderFilterButtons() {
+        document.querySelectorAll('.graded-filter').forEach(btn => {
+          btn.classList.toggle('hidden', !state.graded);
+        });
+        if (!state.graded && ['correct', 'wrong', 'skipped'].includes(state.filter)) {
+          state.filter = 'all';
+        }
+
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+          const f = btn.dataset.filter;
+          const active = f === state.filter;
+          const isHidden = btn.classList.contains('hidden');
+          let base = 'filter-btn px-3 py-1 rounded-full text-xs font-semibold transition ';
+          if (isHidden) base += 'hidden ';
+          if (active) {
+            base += 'theme-btn-primary';
+          } else if (f === 'flagged') {
+            base += 'bg-amber-50 text-amber-800 hover:bg-amber-100';
+          } else if (f === 'correct') {
+            base += 'bg-green-50 text-green-800 hover:bg-green-100';
+          } else if (f === 'wrong') {
+            base += 'bg-red-50 text-red-800 hover:bg-red-100';
+          } else if (f === 'skipped') {
+            base += 'bg-gray-100 text-gray-700 hover:bg-gray-200';
+          } else {
+            base += 'bg-pink-50 text-pink-800 hover:bg-pink-100';
+          }
+          btn.className = base;
+        });
+      }
+
+      function renderHistoryModal() {
+        const count = historyListData.length;
+        historyCountBadge.textContent = String(count);
+        document.getElementById('histTotalCount').textContent = String(count);
+
+        if (count === 0) {
+          document.getElementById('histAvgAccuracy').textContent = '0%';
+          document.getElementById('histBestAccuracy').textContent = '0%';
+          document.getElementById('histChartWrap').classList.add('hidden');
+          document.getElementById('historyList').innerHTML =
+            '<div class="py-8 text-center text-sm text-gray-500">No graded attempts yet. Click <strong>Grade Key</strong> to record your first attempt.</div>';
+          return;
+        }
+
+        const avgAcc = Math.round(historyListData.reduce((acc, h) => acc + (h.accuracy || 0), 0) / count);
+        const bestAcc = Math.max(...historyListData.map(h => h.accuracy || 0));
+        document.getElementById('histAvgAccuracy').textContent = `${avgAcc}%`;
+        document.getElementById('histBestAccuracy').textContent = `${bestAcc}%`;
+
+        const recent = historyListData.slice(0, 12).reverse();
+        const sparkWrap = document.getElementById('histSparkline');
+        sparkWrap.innerHTML = '';
+        recent.forEach(item => {
+          const hPct = Math.max(8, item.accuracy || 0);
+          const bar = document.createElement('div');
+          bar.className = 'flex-1 bg-pink-500 hover:bg-pink-600 rounded-t transition-all';
+          bar.style.height = `${hPct}%`;
+          bar.title = `${item.label}: ${item.accuracy}% (${item.score}/${item.maxScore})`;
+          sparkWrap.appendChild(bar);
+        });
+        document.getElementById('histChartWrap').classList.remove('hidden');
+
+        const listEl = document.getElementById('historyList');
+        listEl.innerHTML = '';
+        historyListData.forEach(item => {
+          const card = document.createElement('div');
+          card.className = 'rounded-xl border border-pink-200 bg-pink-50/40 p-3 flex flex-wrap items-center justify-between gap-2 text-xs';
+          card.innerHTML = `
+            <div>
+              <div class="font-bold text-pink-950">${item.label}</div>
+              <div class="text-gray-500 mt-0.5">${item.dateStr} • Time: ${formatShortTime(item.totalTimeSec)}</div>
+            </div>
+            <div class="text-right">
+              <div class="font-bold text-sm text-pink-700">${item.score} / ${item.maxScore} <span class="text-indigo-700">(${item.accuracy}%)</span></div>
+              <div class="text-[11px] text-gray-600">✓ ${item.correct} • ✗ ${item.wrong} • – ${item.skipped}</div>
+            </div>
+          `;
+          listEl.appendChild(card);
+        });
+      }
+
+      function renderAll() {
+        applyTheme();
+        renderSectionFilter();
+        renderGradingBanner();
+        renderFilterButtons();
+        renderSheet();
+        renderNavigator();
+        renderTimer();
+        historyCountBadge.textContent = String(historyListData.length);
+      }
+
+      // Sound toggle in header
+      soundToggleBtn.addEventListener('click', () => {
+        state.soundEnabled = !state.soundEnabled;
+        applyTheme();
+        saveState();
+        if (state.soundEnabled) playSound('mark');
+        showToast(state.soundEnabled ? 'Click sound enabled' : 'Click sound muted');
+      });
+
+      // Event Delegation: OMR Grid (Bubbles & Flags)
+      omrGrid.addEventListener('click', (e) => {
+        const bubble = e.target.closest('button[data-q][data-opt]');
+        if (bubble) {
+          if (state.locked || state.graded) return;
+          const q = bubble.dataset.q;
+          const opt = bubble.dataset.opt;
+          state.activeQuestion = parseInt(q, 10);
+          if (state.answers[q] === opt) {
+            delete state.answers[q];
+            playSound('clear');
+          } else {
+            state.answers[q] = opt;
+            playSound('mark');
+          }
+          renderAll();
+          saveState();
+          return;
+        }
+
+        const flagBtn = e.target.closest('button[data-flag-q]');
+        if (flagBtn) {
+          const q = flagBtn.dataset.flagQ;
+          state.activeQuestion = parseInt(q, 10);
+          if (state.flagged[q]) {
+            delete state.flagged[q];
+          } else {
+            state.flagged[q] = true;
+          }
+          playSound('flag');
+          renderAll();
+          saveState();
+        }
+      });
+
+      // Event Delegation: Navigator Jump
+      navGrid.addEventListener('click', (e) => {
+        const btn = e.target.closest('button[data-jump-q]');
+        if (!btn) return;
+        const qNum = parseInt(btn.dataset.jumpQ, 10);
+        state.activeQuestion = qNum;
+        if (state.filter !== 'all' || state.sectionFilter !== 'all') {
+          state.filter = 'all';
+          state.sectionFilter = 'all';
+        }
+        renderAll();
+        saveState();
+        const row = document.getElementById(`q-row-${qNum}`);
+        if (row) {
+          row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      });
+
+      // Filter Pills & Section Dropdown
+      document.getElementById('filterPills').addEventListener('click', (e) => {
+        const btn = e.target.closest('.filter-btn');
+        if (!btn) return;
+        state.filter = btn.dataset.filter;
+        renderAll();
+        saveState();
+      });
+
+      sectionFilterSelect.addEventListener('change', (e) => {
+        state.sectionFilter = e.target.value;
+        renderAll();
+        saveState();
+      });
+
+      // Timer Controls
+      timerToggleBtn.addEventListener('click', toggleTimer);
+      timerResetBtn.addEventListener('click', resetTimer);
+
+      // Modal Helpers
+      function openModal(id) {
+        document.getElementById(id).classList.remove('hidden');
+      }
+      function closeModal(id) {
+        document.getElementById(id).classList.add('hidden');
+      }
+      document.querySelectorAll('[data-close-modal]').forEach(btn => {
+        btn.addEventListener('click', () => closeModal(btn.dataset.closeModal));
+      });
+
+      // History Modal
+      document.getElementById('openHistoryBtn').addEventListener('click', () => {
+        renderHistoryModal();
+        openModal('historyModal');
+      });
+      document.getElementById('clearHistoryBtn').addEventListener('click', () => {
+        historyListData = [];
+        saveHistory();
+        renderHistoryModal();
+        showToast('Attempt history cleared.');
+      });
+
+      // Setup Modal
+      document.getElementById('openSettingsBtn').addEventListener('click', () => {
+        document.getElementById('inputTheme').value = state.theme || 'pink';
+        document.getElementById('inputStartQuestion').value = state.startQuestion || 1;
+        document.getElementById('inputQuestionCount').value = state.questionCount;
+        document.getElementById('inputOptionCount').value = String(state.optionCount);
+        document.getElementById('inputSectionMode').value = state.sectionMode;
+        document.getElementById('inputTimerMinutes').value = state.timerMinutes;
+        document.getElementById('inputAutoLock').checked = state.autoLockOnTimeUp;
+        document.getElementById('inputSoundEnabled').checked = state.soundEnabled;
+        openModal('settingsModal');
+      });
+
+      document.querySelectorAll('.preset-q').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.getElementById('inputQuestionCount').value = btn.dataset.q;
+        });
+      });
+
+      document.getElementById('applySettingsBtn').addEventListener('click', () => {
+        const themeVal = document.getElementById('inputTheme').value || 'pink';
+        const startVal = Math.min(1000, Math.max(1, parseInt(document.getElementById('inputStartQuestion').value, 10) || 1));
+        const qVal = Math.min(200, Math.max(1, parseInt(document.getElementById('inputQuestionCount').value, 10) || 50));
+        const optVal = parseInt(document.getElementById('inputOptionCount').value, 10) === 5 ? 5 : 4;
+        const secMode = document.getElementById('inputSectionMode').value || 'none';
+        const minVal = Math.min(360, Math.max(1, parseInt(document.getElementById('inputTimerMinutes').value, 10) || 45));
+        const autoLock = document.getElementById('inputAutoLock').checked;
+        const soundOn = document.getElementById('inputSoundEnabled').checked;
+
+        stopTimer();
+        state.theme = themeVal;
+        state.startQuestion = startVal;
+        state.questionCount = qVal;
+        state.optionCount = optVal;
+        state.sectionMode = secMode;
+        state.sectionFilter = 'all';
+        state.retestQueue = null;
+        state.activeQuestion = startVal;
+        state.timerMinutes = minVal;
+        state.secondsLeft = minVal * 60;
+        state.autoLockOnTimeUp = autoLock;
+        state.soundEnabled = soundOn;
+        state.locked = false;
+        state.graded = false;
+
+        const maxQ = startVal + qVal - 1;
+        const validLetters = OPTION_LETTERS.slice(0, optVal);
+        Object.keys(state.answers).forEach(k => {
+          const num = parseInt(k, 10);
+          if (num < startVal || num > maxQ || !validLetters.includes(state.answers[k])) {
+            delete state.answers[k];
+          }
+        });
+        Object.keys(state.flagged).forEach(k => {
+          const num = parseInt(k, 10);
+          if (num < startVal || num > maxQ) delete state.flagged[k];
+        });
+        Object.keys(state.questionTimes).forEach(k => {
+          const num = parseInt(k, 10);
+          if (num < startVal || num > maxQ) delete state.questionTimes[k];
+        });
+
+        closeModal('settingsModal');
+        renderAll();
+        saveState();
+        showToast(`Updated: Q${startVal}–Q${maxQ} (${themeVal} theme).`);
+      });
+
+      // JSON Backup & Restore
+      document.getElementById('backupJsonBtn').addEventListener('click', () => {
+        const payload = {
+          version: 1,
+          exportedAt: new Date().toISOString(),
+          state: { ...state, timerRunning: false },
+          history: historyListData
+        };
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `omr_backup_${new Date().toISOString().slice(0, 10)}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast('JSON backup downloaded!');
+      });
+
+      document.getElementById('restoreJsonBtn').addEventListener('click', () => {
+        document.getElementById('restoreFileInput').click();
+      });
+
+      document.getElementById('restoreFileInput').addEventListener('change', (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          try {
+            const parsed = JSON.parse(String(ev.target.result || ''));
+            if (!parsed || !parsed.state || typeof parsed.state.questionCount !== 'number') {
+              showToast('Invalid OMR backup file.');
+              return;
+            }
+            stopTimer();
+            state = { ...state, ...parsed.state, timerRunning: false };
+            if (Array.isArray(parsed.history)) {
+              historyListData = parsed.history;
+              saveHistory();
+            }
+            saveState();
+            closeModal('settingsModal');
+            renderAll();
+            showToast('Backup restored successfully!');
+          } catch (err) {
+            showToast('Could not read JSON backup file.');
+          }
+        };
+        reader.readAsText(file);
+        e.target.value = '';
+      });
+
+      // Grade Modal
+      document.getElementById('openGradeBtn').addEventListener('click', () => {
+        document.getElementById('inputCorrectMarks').value = state.correctMarks;
+        document.getElementById('inputWrongMarks').value = state.wrongMarks;
+        openModal('gradeModal');
+      });
+
+      document.getElementById('fillSampleKeyBtn').addEventListener('click', () => {
+        const letters = OPTION_LETTERS.slice(0, state.optionCount);
+        const start = state.startQuestion || 1;
+        const parts = [];
+        for (let i = 0; i < state.questionCount; i++) {
+          const q = start + i;
+          const pick = letters[(q * 7 + 3) % letters.length];
+          parts.push(`${q}:${pick}`);
+        }
+        document.getElementById('answerKeyInput').value = parts.join(', ');
+      });
+
+      document.getElementById('runGradeBtn').addEventListener('click', () => {
+        const rawKey = document.getElementById('answerKeyInput').value;
+        const parsedKey = parseAnswerKey(rawKey);
+        const keyCount = Object.keys(parsedKey).length;
+        if (keyCount === 0) {
+          showToast('Please enter a valid answer key (e.g., 1:A, 2:B or ABCD...).');
+          return;
+        }
+        const cMarks = parseFloat(document.getElementById('inputCorrectMarks').value);
+        const wMarks = parseFloat(document.getElementById('inputWrongMarks').value);
+        state.correctMarks = Number.isFinite(cMarks) ? cMarks : 4;
+        state.wrongMarks = Number.isFinite(wMarks) ? wMarks : -1;
+        state.answerKey = parsedKey;
+        state.graded = true;
+        stopTimer();
+        closeModal('gradeModal');
+
+        const stats = computeGradingStats();
+        const isRetest = Array.isArray(state.retestQueue) && state.retestQueue.length > 0;
+        const label = isRetest
+          ? `Re-Test (${state.retestQueue.length}Q)`
+          : `${state.questionCount}Q (Q${state.startQuestion}–Q${state.startQuestion + state.questionCount - 1})${state.sectionMode !== 'none' ? ' • ' + state.sectionMode.toUpperCase() : ''}`;
+
+        historyListData.unshift({
+          id: Date.now(),
+          dateStr: new Date().toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
+          label,
+          score: stats.totalScore,
+          maxScore: stats.maxScore,
+          accuracy: stats.accuracy,
+          correct: stats.correct,
+          wrong: stats.wrong,
+          skipped: stats.skipped,
+          totalTimeSec: stats.totalTimeSec
+        });
+        if (historyListData.length > 50) historyListData = historyListData.slice(0, 50);
+        saveHistory();
+
+        renderAll();
+        saveState();
+        showToast(`Graded ${stats.keyCount} questions & saved to History!`);
+      });
+
+      document.getElementById('clearGradeBtn').addEventListener('click', () => {
+        state.graded = false;
+        state.locked = false;
+        renderAll();
+        saveState();
+      });
+
+      // Re-Test Wrong & Skipped
+      document.getElementById('startRetestBtn').addEventListener('click', () => {
+        const activeNums = getActiveQuestionNumbers();
+        const missed = activeNums.filter(q => {
+          const k = String(q);
+          const key = state.answerKey[k];
+          if (!key) return false;
+          return state.answers[k] !== key;
+        });
+        if (missed.length === 0) {
+          showToast('All keyed questions were correct!');
+          return;
+        }
+        stopTimer();
+        state.retestQueue = missed;
+        state.answers = {};
+        state.flagged = {};
+        state.questionTimes = {};
+        state.graded = false;
+        state.locked = false;
+        state.filter = 'all';
+        state.sectionFilter = 'all';
+        state.activeQuestion = missed[0];
+        state.secondsLeft = state.timerMinutes * 60;
+        renderAll();
+        saveState();
+        showToast(`Re-Test started with ${missed.length} missed/skipped questions!`);
+      });
+
+      document.getElementById('exitRetestBtn').addEventListener('click', () => {
+        stopTimer();
+        state.retestQueue = null;
+        state.answers = {};
+        state.flagged = {};
+        state.questionTimes = {};
+        state.graded = false;
+        state.locked = false;
+        state.filter = 'all';
+        state.sectionFilter = 'all';
+        state.activeQuestion = state.startQuestion || 1;
+        state.secondsLeft = state.timerMinutes * 60;
+        renderAll();
+        saveState();
+        showToast('Returned to full OMR sheet.');
+      });
+
+      // Clear Sheet Confirmation
+      document.getElementById('clearAllBtn').addEventListener('click', () => openModal('confirmClearModal'));
+      document.getElementById('confirmClearBtn').addEventListener('click', () => {
+        state.answers = {};
+        state.flagged = {};
+        state.questionTimes = {};
+        state.graded = false;
+        state.locked = false;
+        closeModal('confirmClearModal');
+        renderAll();
+        saveState();
+        showToast('OMR sheet cleared.');
+      });
+
+      // Export CSV
+      function exportCsv() {
+        const sections = getSections();
+        const activeNums = getActiveQuestionNumbers();
+        const rows = [['Question', 'Section', 'Marked', 'Flagged', 'TimeSec', 'AnswerKey', 'Status']];
+        activeNums.forEach(q => {
+          const k = String(q);
+          const sec = getQuestionSection(q, sections) || 'General';
+          const marked = state.answers[k] || '';
+          const flagged = state.flagged[k] ? 'Yes' : 'No';
+          const qTime = state.questionTimes[k] || 0;
+          const key = state.answerKey[k] || '';
+          let status = 'Unattempted';
+          if (state.graded && key) {
+            status = !marked ? 'Skipped' : marked === key ? 'Correct' : 'Wrong';
+          } else if (marked) {
+            status = 'Marked';
+          }
+          rows.push([k, sec, marked, flagged, qTime, key, status]);
+        });
+        const csvContent = rows.map(r => r.join(',')).join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `pink_omr_${activeNums.length}q.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast('Exported CSV!');
+      }
+      document.getElementById('exportCsvBtn').addEventListener('click', exportCsv);
+      document.getElementById('mobileExportBtn').addEventListener('click', exportCsv);
+
+      // Initialize
+      loadState();
+      renderAll();
+    })();
+  </script>
+</body>
+</html>
